@@ -1,0 +1,20 @@
+{
+	"name": "Cars",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_BLOB_Trainingjs",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
