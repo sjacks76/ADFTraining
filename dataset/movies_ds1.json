@@ -1,0 +1,20 @@
+{
+	"name": "movies_ds1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_BLOB_Trainingjs",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
