@@ -56,7 +56,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> MoviesDB",
-				"Movies derive(titlesNEW = toString(left(title,length(title)-6))) ~> MoviesClean",
+				"Movies derive(titlesNEWsj = toString(left(title,length(title)-6))) ~> MoviesClean",
 				"MoviesClean, MoviesDB join(Movies@title == MoviesDB@title,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
