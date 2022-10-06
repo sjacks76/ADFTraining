@@ -342,6 +342,45 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MoviesOpCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_BLOB_Trainingjs",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "output"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_BLOB_Trainingjs')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_MOVE_CSV_TO_SQLBDjs')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -464,6 +503,91 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/movies_ds1')]",
 				"[concat(variables('factoryId'), '/datasets/moviesdboutput')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_joinsj')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "movies_ds1",
+								"type": "DatasetReference"
+							},
+							"name": "Movies"
+						},
+						{
+							"dataset": {
+								"referenceName": "MoviesDB_DS",
+								"type": "DatasetReference"
+							},
+							"name": "MoviesDB"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "MoviesOpCSV",
+								"type": "DatasetReference"
+							},
+							"name": "MoviesOP"
+						}
+					],
+					"transformations": [
+						{
+							"name": "MoviesClean"
+						},
+						{
+							"name": "joinMovies"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          movieId as string,",
+						"          title as string,",
+						"          genres as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Movies",
+						"source(output(",
+						"          movie as string,",
+						"          title as string,",
+						"          genres as string,",
+						"          year as string,",
+						"          Rating as string,",
+						"          RottenTomato as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> MoviesDB",
+						"Movies derive(titlesNEW = toString(left(title,length(title)-6))) ~> MoviesClean",
+						"MoviesClean, MoviesDB join(titlesNEW == MoviesDB@title,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinMovies",
+						"joinMovies sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Column_1 as string,",
+						"          Column_2 as string,",
+						"          Column_3 as string,",
+						"          Column_4 as string",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> MoviesOP"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/movies_ds1')]",
+				"[concat(variables('factoryId'), '/datasets/MoviesDB_DS')]",
+				"[concat(variables('factoryId'), '/datasets/MoviesOpCSV')]"
 			]
 		},
 		{
