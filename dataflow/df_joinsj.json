@@ -1,0 +1,60 @@
+{
+	"name": "df_joinsj",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "movies_ds1",
+						"type": "DatasetReference"
+					},
+					"name": "Movies"
+				},
+				{
+					"dataset": {
+						"referenceName": "MoviesDB_DS",
+						"type": "DatasetReference"
+					},
+					"name": "MoviesDB"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "MoviesClean"
+				},
+				{
+					"name": "joinMovies"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          movieId as string,",
+				"          title as string,",
+				"          genres as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Movies",
+				"source(output(",
+				"          movie as string,",
+				"          title as string,",
+				"          genres as string,",
+				"          year as string,",
+				"          Rating as string,",
+				"          RottenTomato as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> MoviesDB",
+				"Movies derive(titlesNEW = toString(left(title,length(title)-6))) ~> MoviesClean",
+				"MoviesClean, MoviesDB join(titlesNEW == MoviesDB@title,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinMovies"
+			]
+		}
+	}
+}
